@@ -31,6 +31,9 @@ const searchRoutes = require('./routes/searchRoutes');
 // Register API: import registerRoutes
 const registerRoutes = require('./routes/registerRoutes');
 
+// Auth API: import authRoutes
+const authRoutes = require('./routes/authRoutes');
+
 
 const pinoHttp = require('pino-http');
 const logger = require('./logger');
@@ -46,6 +49,9 @@ app.use('/api/search', searchRoutes);
 
 // Register API: add the registerRoutes to the server
 app.use('/api/register', registerRoutes);
+
+// Auth API: add the authRoutes to the server
+app.use('/api/auth', authRoutes);
 
 
 // Global Error Handler
