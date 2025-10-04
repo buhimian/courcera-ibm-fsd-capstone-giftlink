@@ -1,133 +1,104 @@
+
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import './Profile.css'
-import {urlConfig} from '../../config';
+import './Profile.css';
+import { urlConfig } from '../../config';
 import { useAppContext } from '../../context/AuthContext';
 
 const Profile = () => {
-  const [userDetails, setUserDetails] = useState({});
- const [updatedDetails, setUpdatedDetails] = useState({});
- const {setUserName} = useAppContext();
- const [changed, setChanged] = useState("");
-
- const [editMode, setEditMode] = useState(false);
+  const [firstName, setFirstName] = useState("");
+  const [lastName, setLastName] = useState("");
+  const [email, setEmail] = useState("");
+  const [changed, setChanged] = useState("");
+  const [editMode, setEditMode] = useState(false);
+  const { setUserName } = useAppContext();
   const navigate = useNavigate();
+
   useEffect(() => {
     const authtoken = sessionStorage.getItem("auth-token");
     if (!authtoken) {
       navigate("/app/login");
-    } else {
-      fetchUserProfile();
+      return;
     }
+    setFirstName(sessionStorage.getItem("firstName") || "");
+    setLastName(sessionStorage.getItem("lastName") || "");
+    setEmail(sessionStorage.getItem("email") || "");
   }, [navigate]);
 
-  const fetchUserProfile = async () => {
-    try {
-      const authtoken = sessionStorage.getItem("auth-token");
-      const email = sessionStorage.getItem("email");
-      const name=sessionStorage.getItem('name');
-      if (name || authtoken) {
-                const storedUserDetails = {
-                  name: name,
-                  email:email
-                };
+  const handleEdit = () => {
+    setEditMode(true);
+  };
 
-                setUserDetails(storedUserDetails);
-                setUpdatedDetails(storedUserDetails);
-              }
-} catch (error) {
-  console.error(error);
-  // Handle error case
-}
-};
+  const handleCancel = () => {
+    setEditMode(false);
+    setFirstName(sessionStorage.getItem("firstName") || "");
+    setLastName(sessionStorage.getItem("lastName") || "");
+  };
 
-const handleEdit = () => {
-setEditMode(true);
-};
-
-const handleInputChange = (e) => {
-setUpdatedDetails({
-  ...updatedDetails,
-  [e.target.name]: e.target.value,
-});
-};
-const handleSubmit = async (e) => {
-  e.preventDefault();
-
-  try {
+  const handleSubmit = async (e) => {
+    e.preventDefault();
     const authtoken = sessionStorage.getItem("auth-token");
-    const email = sessionStorage.getItem("email");
-
     if (!authtoken || !email) {
       navigate("/app/login");
       return;
     }
-
-    const payload = { ...updatedDetails };
-    const response = await fetch(`${urlConfig.backendUrl}/api/auth/update`, {
-      //Step 1: Task 1
-      //Step 1: Task 2
-      //Step 1: Task 3
-    });
-
-    if (response.ok) {
-      // Update the user details in session storage
-      //Step 1: Task 4
-      //Step 1: Task 5
-      setUserDetails(updatedDetails);
-      setEditMode(false);
-      // Display success message to the user
-      setChanged("Name Changed Successfully!");
-      setTimeout(() => {
-        setChanged("");
-        navigate("/");
-      }, 1000);
-
-    } else {
-      // Handle error case
-      throw new Error("Failed to update profile");
+    try {
+      const payload = { firstName, lastName };
+      const response = await fetch(`${urlConfig.backendUrl}/api/auth/update`, {
+        method: 'PUT',
+        headers: {
+          "Authorization": `Bearer ${authtoken}`,
+          "Content-Type": "application/json",
+          "Email": email,
+        },
+        body: JSON.stringify(payload),
+      });
+      if (response.ok) {
+        setUserName(firstName);
+        sessionStorage.setItem("firstName", firstName);
+        sessionStorage.setItem("lastName", lastName);
+        setChanged("Profile updated successfully!");
+        setEditMode(false);
+        setTimeout(() => {
+          setChanged("");
+        }, 1500);
+      } else {
+        setChanged("Failed to update profile.");
+      }
+    } catch (error) {
+      setChanged("Error updating profile.");
     }
-  } catch (error) {
-    console.error(error);
-    // Handle error case
-  }
-};
+  };
 
-return (
-<div className="profile-container">
-  {editMode ? (
-<form onSubmit={handleSubmit}>
-<label>
-  Email
-  <input
-    type="email"
-    name="email"
-    value={userDetails.email}
-    disabled // Disable the email field
-  />
-</label>
-<label>
-   Name
-   <input
-     type="text"
-     name="name"
-     value={updatedDetails.name}
-     onChange={handleInputChange}
-   />
-</label>
-
-<button type="submit">Save</button>
-</form>
-) : (
-<div className="profile-details">
-<h1>Hi, {userDetails.name}</h1>
-<p> <b>Email:</b> {userDetails.email}</p>
-<button onClick={handleEdit}>Edit</button>
-<span style={{color:'green',height:'.5cm',display:'block',fontStyle:'italic',fontSize:'12px'}}>{changed}</span>
-</div>
-)}
-</div>
-);
+  return (
+    <div className="profile-container">
+      {editMode ? (
+        <form onSubmit={handleSubmit} className="profile-form">
+          <div className="form-group">
+            <label>Email</label>
+            <input type="email" value={email} disabled className="form-control" />
+          </div>
+          <div className="form-group">
+            <label>First Name</label>
+            <input type="text" value={firstName} onChange={e => setFirstName(e.target.value)} className="form-control" required />
+          </div>
+          <div className="form-group">
+            <label>Last Name</label>
+            <input type="text" value={lastName} onChange={e => setLastName(e.target.value)} className="form-control" required />
+          </div>
+          <button type="submit" className="btn btn-success mr-2">Save</button>
+          <button type="button" className="btn btn-secondary" onClick={handleCancel}>Cancel</button>
+        </form>
+      ) : (
+        <div className="profile-details">
+          <h1>Hi, {firstName} {lastName}</h1>
+          <p><b>Email:</b> {email}</p>
+          <button className="btn btn-primary" onClick={handleEdit}>Edit</button>
+          <span style={{ color: 'green', height: '.5cm', display: 'block', fontStyle: 'italic', fontSize: '12px' }}>{changed}</span>
+        </div>
+      )}
+    </div>
+  );
 };
 
 export default Profile;

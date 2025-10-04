@@ -5,6 +5,7 @@ import RegisterPage from './components/RegisterPage/RegisterPage';
 import LoginPage from './components/LoginPage/LoginPage';
 import DetailsPage from './components/DetailsPage/DetailsPage';
 import SearchPage from './components/SearchPage/SearchPage';
+import Profile from './components/Profile/Profile';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import './App.css';
 import Navbar from './components/Navbar/Navbar';
@@ -25,7 +26,8 @@ function App() {
           <Route path="/app/product/:productId" element={<DetailsPage />} />
           {/* Search page route */}
           <Route path="/app/search" element={<SearchPage />} />
-        </Routes>
+  <Route path="/app/profile" element={<Profile/>} />
+  </Routes>
         </>
   );
 }

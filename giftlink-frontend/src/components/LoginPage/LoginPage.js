@@ -1,14 +1,70 @@
-import React, { useState } from 'react';
+
+import React, { useState, useEffect } from 'react';
 import './LoginPage.css';
+// Task 1: Import urlConfig from config.js
+import { urlConfig } from '../../config';
+// Task 2: Import useAppContext from AuthContext.js
+import { useAppContext } from '../../context/AuthContext';
+// Task 3: Import useNavigate from react-router-dom
+import { useNavigate } from 'react-router-dom';
+
 
 function LoginPage() {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
+    // Task 4: Include a state for incorrect password
+    const [incorrect, setIncorrect] = useState('');
+
+    // Task 5: Create local variables for navigate, bearerToken, setIsLoggedIn
+    const navigate = useNavigate();
+    const bearerToken = sessionStorage.getItem('bearer-token');
+    const { setIsLoggedIn } = useAppContext();
+
+    // Task 6: If the bearerToken has a value (user already logged in), navigate to MainPage
+    useEffect(() => {
+        if (sessionStorage.getItem('auth-token')) {
+            navigate('/app');
+        }
+    }, [navigate]);
 
     const handleLogin = async () => {
-        console.log('Inside handleLogin');
-        console.log('Email:', email, 'Password:', password);
-    }
+        setIncorrect('');
+        try {
+            const res = await fetch(`${urlConfig.backendUrl}/api/auth/login`, {
+                method: 'POST',
+                headers: {
+                    'content-type': 'application/json',
+                    'Authorization': bearerToken ? `Bearer ${bearerToken}` : '',
+                },
+                body: JSON.stringify({
+                    email: email,
+                    password: password,
+                })
+            });
+            // Task 1: Access data coming from fetch API
+            const json = await res.json();
+            if (json.authtoken) {
+                // Task 2: Set user details
+                sessionStorage.setItem('auth-token', json.authtoken);
+                sessionStorage.setItem('name', json.userName);
+                sessionStorage.setItem('email', json.userEmail);
+                // Task 3: Set the user's state to log in using useAppContext
+                setIsLoggedIn(true);
+                // Task 4: Navigate to the MainPage after logging in
+                navigate('/app');
+            } else {
+                // Task 5: Clear input and set an error message if the password is incorrect
+                document.getElementById("email").value = "";
+                document.getElementById("password").value = "";
+                setIncorrect("Wrong password. Try again.");
+                setTimeout(() => {
+                    setIncorrect("");
+                }, 2000);
+            }
+        } catch (e) {
+            setIncorrect('Error fetching details: ' + e.message);
+        }
+    };
 
     return (
         <div className="container mt-5">
@@ -16,6 +72,7 @@ function LoginPage() {
                 <div className="col-md-10 col-lg-8">
                     <div className="login-card p-4 border rounded">
                         <h2 className="text-center mb-4 font-weight-bold">Login</h2>
+                        <span style={{color:'red',height:'.5cm',display:'block',fontStyle:'italic',fontSize:'12px'}}>{incorrect}</span>
                         <div className="mb-3">
                             <label htmlFor="email" className="form-label">Email</label>
                             <input

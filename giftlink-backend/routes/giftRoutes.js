@@ -35,7 +35,7 @@ router.get('/:id', async (req, res) => {
         // Task 3: Find a specific gift by ID using the collection.fineOne method and store in constant called gift
         let gift;
         try {
-            gift = await collection.findOne({ _id: new ObjectId(id) });
+            gift = await collection.findOne({ id: id });
         } catch (err) {
             // invalid ObjectId
             return res.status(400).send('Invalid id');
