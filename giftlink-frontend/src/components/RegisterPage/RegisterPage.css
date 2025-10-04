@@ -1,0 +1,44 @@
+/* RegisterPage styles */
+.register-card {
+    background-color: #fff;
+    box-shadow: 0px 6px 18px rgba(0, 0, 0, 0.08);
+}
+.register-card .form-label {
+    font-weight: 600;
+}
+.register-card input {
+    border-radius: 0.25rem;
+}
+.register-card .btn {
+    padding: 0.6rem 1rem;
+    border-radius: 0.35rem;
+}
+.register-card .btn-primary {
+    background-color: #0056b3;
+    border: none;
+}
+.register-card .btn-secondary {
+    background-color: #6c757d;
+    border: none;
+}
+.register-card .text-primary {
+    color: #0056b3;
+}
+.register-card .text-secondary {
+    color: #6c757d;
+}
+
+/* Layout tweaks */
+.register-card {
+    padding: 1.75rem;
+    border-radius: 8px;
+}
+.register-card .form-control {
+    height: 44px;
+}
+
+@media (max-width: 576px) {
+    .register-card {
+        padding: 1rem;
+    }
+}
